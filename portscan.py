@@ -4,7 +4,15 @@ import sys
 import time
 #ip = socket.gethostbyname(target)
 
-
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 ips = []
 def getTargets(ip, iprange):
@@ -28,6 +36,8 @@ def getTargets(ip, iprange):
                 for i3 in range(0, 256):
                     ips.append("%s.%s.%s.%s" % (ipSeparated[0], i, i2, i3))
 
+    if iprange == 0:
+        ips.append(ip)
 
 def scan(ip, port):
 #    print(enemyOfTheState[:15])
@@ -39,7 +49,7 @@ def scan(ip, port):
 
     try:
         con = s.connect((ip,port))
-        print("->%s:%s" % (ip, port))
+        print(bcolors.OKGREEN + "[OPEN] -> %s:%s" % (ip, port) + bcolors.ENDC)
         con.close()
     except: 
         #print("Failed for %s on port %s" % (ip, port))
@@ -58,19 +68,19 @@ def prepIpAndPorts():
 
 
 def scanNetworks(port=""):
-    #try:
-    if port != "":
-        for ip in range(len(ips)):
-            scan(ips[0], port)
-            ips.pop(0)
-    else:
-        prepIpAndPorts()
-        for i in range(1, len(enemyOfTheState)):
-            scan(enemyOfTheState[0], enemyOfTheState[1])
+    try:
+        if port != "":
+            for ip in range(len(ips)):
+                scan(ips[0], port)
+                ips.pop(0)
+        else:
             prepIpAndPorts()
-            enemyOfTheState.pop(1)
-    #except:
-    #    exit()
+            for i in range(1, len(enemyOfTheState)):
+                scan(enemyOfTheState[0], enemyOfTheState[1])
+                prepIpAndPorts()
+                enemyOfTheState.pop(1)
+    except:
+        exit()
 
 
 if len(sys.argv) < 3:
@@ -80,7 +90,6 @@ if len(sys.argv) < 3:
 start = time.time()
 
 getTargets(str(sys.argv[1]), int(sys.argv[2]))
-print(len(ips))
 for i in range(500):
     if(len(sys.argv) > 4):
         t = threading.Thread(target=scanNetworks, kwargs={'port':int(sys.argv[4])})
@@ -89,6 +98,10 @@ for i in range(500):
         t = threading.Thread(target=scanNetworks)
         t.start()
 
+old = 0
 while 1:
-    print(len(enemyOfTheState))
-    time.sleep(5)
+    if(len(sys.argv) < 5):
+        old = len(enemyOfTheState)
+        print(bcolors.OKBLUE +  "Enemy -> %s || The Most Recent Port Checked -> %s" % (enemyOfTheState[0], enemyOfTheState[1]) + bcolors.ENDC)
+        time.sleep(5)
+        print(bcolors.WARNING + "Ports scanned every 5 seconds: " + str(old - len(enemyOfTheState)) + bcolors.ENDC)
