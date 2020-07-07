@@ -2,8 +2,20 @@
 
 
 ## 1. Usage:
+The 24, 16, 8 are done the same as how *NMAP* would do it
+`ex: nmap 192.168.100.0/24`
+
+`ex: nmap 192.168.0.0/16`
+
+`ex: nmap 192.0.0.0/8`
+
+The option 0 is to scan a single host
+
+`ex: nmap 192.168.100.1`
+
+
 ```
-python portscan.py ip iprange(ex: 24,16,8)
+python portscan.py ip iprange(ex: 24, 16, 8, 0) [OPTIONAL]timeout(ex: 0.5) [OPTIONAL]port
 ```
 
 ## 2. Examaple
