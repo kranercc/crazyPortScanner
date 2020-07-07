@@ -1,11 +1,14 @@
 import threading
 import socket
 import sys
+import time
 #ip = socket.gethostbyname(target)
 
 
+
+ips = []
 def getTargets(ip, iprange):
-    ips = []
+    global ips
     ipSeparated = []
     ipSeparated=ip.split(".")
     if iprange == 24:
@@ -24,32 +27,68 @@ def getTargets(ip, iprange):
             for i2 in range(0,256):
                 for i3 in range(0, 256):
                     ips.append("%s.%s.%s.%s" % (ipSeparated[0], i, i2, i3))
-    return ips
 
-def portscan(port):
-    target = getTargets(str(sys.argv[1]), int(sys.argv[2]))
-    for targettedBoi in target:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        
-        if len(sys.argv) == 4:
-            s.settimeout(float(sys.argv[3]))
-        s.settimeout(0.5) 
 
-        try:
-            con = s.connect((targettedBoi,port))
-            print("->%s:%s" % (targettedBoi, port))
+def scan(ip, port):
+#    print(enemyOfTheState[:15])
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if(len(sys.argv) > 3):
+        s.settimeout(float(sys.argv[3]))
 
-            con.close()
-        except: 
-            pass
-r = 1 
+    s.settimeout(0.5)
+
+    try:
+        con = s.connect((ip,port))
+        print("->%s:%s" % (ip, port))
+        con.close()
+    except: 
+        #print("Failed for %s on port %s" % (ip, port))
+        pass
+
+
+enemyOfTheState = ["0"]
+def prepIpAndPorts():
+    if(len(enemyOfTheState) < 2):
+        getTargets(str(sys.argv[1]), int(sys.argv[2]))
+        enemyOfTheState[0] = ips[0]
+        for p in range(1,65536):
+            enemyOfTheState.append(p)
+        ips.pop(0)
+
+
+
+def scanNetworks(port=""):
+    #try:
+    if port != "":
+        for ip in range(len(ips)):
+            scan(ips[0], port)
+            ips.pop(0)
+    else:
+        prepIpAndPorts()
+        for i in range(1, len(enemyOfTheState)):
+            scan(enemyOfTheState[0], enemyOfTheState[1])
+            prepIpAndPorts()
+            enemyOfTheState.pop(1)
+    #except:
+    #    exit()
+
 
 if len(sys.argv) < 3:
-        print("Usage: python script.py ip iprange(ex: 24, 16, 8) [OPTIONAL]timeout")
+        print("Usage: python script.py ip iprange(ex: 24, 16, 8) [OPTIONAL]timeout(ex: 0.5) [OPTIONAL]port ")
         exit()
 
-for x in range(1,65535): 
-    t = threading.Thread(target=portscan,kwargs={'port':r}) 
+start = time.time()
 
-    r += 1     
-    t.start() 
+getTargets(str(sys.argv[1]), int(sys.argv[2]))
+print(len(ips))
+for i in range(500):
+    if(len(sys.argv) > 4):
+        t = threading.Thread(target=scanNetworks, kwargs={'port':int(sys.argv[4])})
+        t.start()
+    else:
+        t = threading.Thread(target=scanNetworks)
+        t.start()
+
+while 1:
+    print(len(enemyOfTheState))
+    time.sleep(5)
