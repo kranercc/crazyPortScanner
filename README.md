@@ -3,6 +3,7 @@
 
 ## 1. Usage:
 The 24, 16, 8 are done the same as how *NMAP* would do it
+
 `ex: nmap 192.168.100.0/24`
 
 `ex: nmap 192.168.0.0/16`
