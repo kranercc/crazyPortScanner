@@ -2,6 +2,7 @@ import threading
 import socket
 import sys
 import time
+import os
 #ip = socket.gethostbyname(target)
 
 class bcolors:
@@ -13,6 +14,7 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+    
 
 ips = []
 def getTargets(ip, iprange):
@@ -39,6 +41,9 @@ def getTargets(ip, iprange):
     if iprange == 0:
         ips.append(ip)
 
+nmapCommand = "nmap -sC -sV -oN nmap/fullScan -p"
+
+portsOpenPerIP = []
 def scan(ip, port):
 #    print(enemyOfTheState[:15])
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,6 +55,10 @@ def scan(ip, port):
     try:
         con = s.connect((ip,port))
         print(bcolors.OKGREEN + "[OPEN] -> %s:%s" % (ip, port) + bcolors.ENDC)
+        portsOpenPerIP.append(port)
+
+    
+  
         con.close()
     except: 
         #print("Failed for %s on port %s" % (ip, port))
@@ -61,7 +70,7 @@ def prepIpAndPorts():
     if(len(enemyOfTheState) < 2):
         getTargets(str(sys.argv[1]), int(sys.argv[2]))
         enemyOfTheState[0] = ips[0]
-        for p in range(1,65536):
+        for p in range(1,1000):
             enemyOfTheState.append(p)
         ips.pop(0)
 
@@ -98,8 +107,21 @@ for i in range(500):
         t = threading.Thread(target=scanNetworks)
         t.start()
 
+
+
+def checkMultiplePorts_antiloop():
+    global portsOpenPerIP
+    for port in portsOpenPerIP:
+        if portsOpenPerIP.count(port) > 1:
+            print("aoleu")
+            os.kill(os.getpid(), 9)
+
+
 old = 0
 while 1:
+
+    checkMultiplePorts_antiloop()
+
     if(len(sys.argv) < 5):
         old = len(enemyOfTheState)
         print(bcolors.OKBLUE +  "Enemy -> %s || The Most Recent Port Checked -> %s" % (enemyOfTheState[0], enemyOfTheState[1]) + bcolors.ENDC)
