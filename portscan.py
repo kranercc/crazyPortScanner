@@ -70,7 +70,7 @@ def prepIpAndPorts():
     if(len(enemyOfTheState) < 2):
         getTargets(str(sys.argv[1]), int(sys.argv[2]))
         enemyOfTheState[0] = ips[0]
-        for p in range(1,1000):
+        for p in range(1,65536):
             enemyOfTheState.append(p)
         ips.pop(0)
 
@@ -118,12 +118,17 @@ def checkMultiplePorts_antiloop():
 
 
 old = 0
+
+startTime = time.time()
 while 1:
 
     checkMultiplePorts_antiloop()
 
-    if(len(sys.argv) < 5):
-        old = len(enemyOfTheState)
-        print(bcolors.OKBLUE +  "Enemy -> %s || The Most Recent Port Checked -> %s" % (enemyOfTheState[0], enemyOfTheState[1]) + bcolors.ENDC)
-        time.sleep(5)
-        print(bcolors.WARNING + "Ports scanned every 5 seconds: " + str(old - len(enemyOfTheState)) + bcolors.ENDC)
+    if (time.time() - startTime) > 5:
+        if(len(sys.argv) < 5):
+            old = len(enemyOfTheState)
+            print(bcolors.OKBLUE +  "Enemy -> %s || The Most Recent Port Checked -> %s" % (enemyOfTheState[0], enemyOfTheState[1]) + bcolors.ENDC)
+
+            print(bcolors.WARNING + "Ports scanned every 5 seconds: " + str(old - len(enemyOfTheState)) + bcolors.ENDC)
+        
+        startTime = time.time()
