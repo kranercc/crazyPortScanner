@@ -70,7 +70,7 @@ def prepIpAndPorts():
     if(len(enemyOfTheState) < 2):
         getTargets(str(sys.argv[1]), int(sys.argv[2]))
         enemyOfTheState[0] = ips[0]
-        for p in range(1,65536):
+        for p in range(1,1000):
             enemyOfTheState.append(p)
         ips.pop(0)
 
@@ -110,10 +110,19 @@ for i in range(500):
 
 
 def checkMultiplePorts_antiloop():
-    global portsOpenPerIP
+    global portsOpenPerIP, nmapCommand, enemyOfTheState
     for port in portsOpenPerIP:
         if portsOpenPerIP.count(port) > 1:
-            print("aoleu")
+            portsOpenPerIP.pop(-1)
+            for p in portsOpenPerIP:
+                if p != portsOpenPerIP[-1]:
+                    nmapCommand += str(str(p) + ',')
+                else:
+                    nmapCommand += str(p)
+
+            print("You may now use\n " +bcolors.OKGREEN+ "%s %s" % (nmapCommand,enemyOfTheState[0]) + bcolors.ENDC)
+            
+             
             os.kill(os.getpid(), 9)
 
 
@@ -121,7 +130,6 @@ old = 0
 
 startTime = time.time()
 while 1:
-
     checkMultiplePorts_antiloop()
 
     if (time.time() - startTime) > 5:
