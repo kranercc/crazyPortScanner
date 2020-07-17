@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import threading
 import socket
 import sys
@@ -70,26 +71,24 @@ def prepIpAndPorts():
     if(len(enemyOfTheState) < 2):
         getTargets(str(sys.argv[1]), int(sys.argv[2]))
         enemyOfTheState[0] = ips[0]
-        for p in range(1,1000):
+        for p in range(1,65536):
             enemyOfTheState.append(p)
         ips.pop(0)
 
 
 
 def scanNetworks(port=""):
-    try:
-        if port != "":
-            for ip in range(len(ips)):
-                scan(ips[0], port)
-                ips.pop(0)
-        else:
-            prepIpAndPorts()
-            for i in range(1, len(enemyOfTheState)):
-                scan(enemyOfTheState[0], enemyOfTheState[1])
-                prepIpAndPorts()
-                enemyOfTheState.pop(1)
-    except:
-        exit()
+    while 1:
+        try:
+            if port != "":
+                for ip in range(len(ips)):
+                    scan(ips[0], port)
+                    ips.pop(0)
+            else:
+                    scan(enemyOfTheState[0], enemyOfTheState[1])
+                    enemyOfTheState.pop(1)
+        except:
+            exit()
 
 
 if len(sys.argv) < 3:
@@ -99,6 +98,9 @@ if len(sys.argv) < 3:
 start = time.time()
 
 getTargets(str(sys.argv[1]), int(sys.argv[2]))
+
+
+prepIpAndPorts()
 for i in range(500):
     if(len(sys.argv) > 4):
         t = threading.Thread(target=scanNetworks, kwargs={'port':int(sys.argv[4])})
@@ -106,37 +108,21 @@ for i in range(500):
     else:
         t = threading.Thread(target=scanNetworks)
         t.start()
-
-
-
-def checkMultiplePorts_antiloop():
-    global portsOpenPerIP, nmapCommand, enemyOfTheState
-    for port in portsOpenPerIP:
-        if portsOpenPerIP.count(port) > 1:
-            portsOpenPerIP.pop(-1)
-            for p in portsOpenPerIP:
-                if p != portsOpenPerIP[-1]:
-                    nmapCommand += str(str(p) + ',')
-                else:
-                    nmapCommand += str(p)
-
-            print("You may now use\n " +bcolors.OKGREEN+ "%s %s" % (nmapCommand,enemyOfTheState[0]) + bcolors.ENDC)
-            
-             
-            os.kill(os.getpid(), 9)
-
+                
 
 old = 0
 
 startTime = time.time()
 while 1:
-    checkMultiplePorts_antiloop()
+    if len(enemyOfTheState) == 1:
+        print("Scan finished")
+        exit()
 
-    if (time.time() - startTime) > 5:
+
+
+    if (time.time() - startTime) > 0.3:
         if(len(sys.argv) < 5):
-            old = len(enemyOfTheState)
             print(bcolors.OKBLUE +  "Enemy -> %s || The Most Recent Port Checked -> %s" % (enemyOfTheState[0], enemyOfTheState[1]) + bcolors.ENDC)
-
-            print(bcolors.WARNING + "Ports scanned every 5 seconds: " + str(old - len(enemyOfTheState)) + bcolors.ENDC)
         
+
         startTime = time.time()
