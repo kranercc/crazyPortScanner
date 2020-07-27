@@ -28,3 +28,6 @@ _Single Host Scan Option_
 
 
 ![Single Host](https://i.imgur.com/CdWkG4o.png)
+
+_Nmap Command After Scan_
+![NmapAdded](https://i.imgur.com/hyHNBet.png)
