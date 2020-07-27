@@ -42,7 +42,7 @@ def getTargets(ip, iprange):
     if iprange == 0:
         ips.append(ip)
 
-nmapCommand = "nmap -sC -sV -oN nmap/fullScan -p"
+nmapCommand = "nmap -A -sC -sV -oN nmapScan -p"
 
 portsOpenPerIP = []
 def scan(ip, port):
@@ -71,7 +71,7 @@ def prepIpAndPorts():
     if(len(enemyOfTheState) < 2):
         getTargets(str(sys.argv[1]), int(sys.argv[2]))
         enemyOfTheState[0] = ips[0]
-        for p in range(1,65536):
+        for p in range(1,200):
             enemyOfTheState.append(p)
         ips.pop(0)
 
@@ -115,12 +115,22 @@ old = 0
 startTime = time.time()
 while 1:
     if len(enemyOfTheState) == 1:
-        print("Scan finished")
+        print("Scan finished.. extra 5s delays for socks to finish")
+        time.sleep(5)
+
+        for p in portsOpenPerIP:
+            if p is not portsOpenPerIP[-1]:
+                nmapCommand += str(p) + "," 
+            else:
+                nmapCommand += str(p) + " " + enemyOfTheState[0]
+
+        print(nmapCommand)
+        os.system(nmapCommand)
         exit()
 
 
 
-    if (time.time() - startTime) > 0.3:
+    if (time.time() - startTime) > 1:
         if(len(sys.argv) < 5):
             print(bcolors.OKBLUE +  "Enemy -> %s || The Most Recent Port Checked -> %s" % (enemyOfTheState[0], enemyOfTheState[1]) + bcolors.ENDC)
         
